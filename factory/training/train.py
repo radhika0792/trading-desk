@@ -130,7 +130,7 @@ def train(args):
     # float16 AMP on CUDA (T4 accelerates fp16 natively), bfloat16 on MPS
     use_amp = device.type in ("cuda", "mps")
     amp_dtype = torch.float16 if device.type == "cuda" else torch.bfloat16
-    scaler = torch.cuda.GradScaler() if device.type == "cuda" else None
+    scaler = torch.amp.GradScaler("cuda") if device.type == "cuda" else None
 
     print(f"\nStarting {args.mode} — {epochs} epochs, batch_size={batch_size}, lr={lr}")
     if args.resume:
