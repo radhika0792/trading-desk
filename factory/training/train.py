@@ -34,6 +34,8 @@ def load_config(path: str) -> dict:
 
 
 def get_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device("cuda")
     if torch.backends.mps.is_available():
         return torch.device("mps")
     return torch.device("cpu")
@@ -111,8 +113,8 @@ def train(agent: str):
     )
 
     # ── Mixed precision ────────────────────────────────────────────────────
-    dtype = torch.bfloat16 if mixed_precision and device.type == "mps" else torch.float32
-    use_amp = mixed_precision and device.type == "mps"
+    dtype = torch.bfloat16 if mixed_precision and device.type in ("mps", "cuda") else torch.float32
+    use_amp = mixed_precision and device.type in ("mps", "cuda")
 
     # ── Training loop ──────────────────────────────────────────────────────
     print(f"\nStarting training — {epochs} epochs, batch_size={batch_size}, lr={lr}")
@@ -141,7 +143,7 @@ def train(agent: str):
             optimizer.zero_grad()
 
             if use_amp:
-                with torch.autocast(device_type="mps", dtype=dtype):
+                with torch.autocast(device_type=device.type, dtype=dtype):
                     logits = model(input_ids)
                     loss = nn.functional.cross_entropy(
                         logits.reshape(-1, model_cfg.vocab_size),
