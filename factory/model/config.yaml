@@ -2,7 +2,7 @@
 # To reduce model size: lower n_layers or hidden_dim
 # To increase context: raise context_window (costs memory)
 
-vocab_size: 16000         # Set from tokenizer output — update after each tokenizer rebuild
+vocab_size: 16100         # Set from tokenizer output — update after each tokenizer rebuild
 n_layers: 24
 n_heads: 12
 hidden_dim: 768

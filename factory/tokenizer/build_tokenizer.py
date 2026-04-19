@@ -32,7 +32,24 @@ OUTPUT_PATH = Path(__file__).parent / "tokenizer.json"
 
 VOCAB_SIZE = 16000
 
-SPECIAL_TOKENS = ["<pad>", "<unk>", "<bos>", "<eos>", "<sys>", "<user>", "<assistant>"]
+SPECIAL_TOKENS = [
+    "<pad>", "<unk>", "<bos>", "<eos>", "<sys>", "<user>", "<assistant>",
+    # Indian indices
+    "NIFTY", "BANKNIFTY", "GIFTNIFTY", "SENSEX", "FINNIFTY",
+    # Top NSE stocks
+    "RELIANCE", "HDFCBANK", "ICICIBANK", "TATASTEEL", "TATAMOTORS",
+    "BAJFINANCE", "INFY", "TCS", "WIPRO", "SBIN", "AXISBANK",
+    "ADANIENT", "HINDUNILVR", "KOTAKBANK", "LT", "MARUTI", "NTPC",
+    "POWERGRID", "SUNPHARMA", "TITAN", "ULTRACEMCO", "BAJAJFINSV",
+    "BHARTIARTL", "HCLTECH", "ONGC", "TECHM", "INDUSINDBK",
+    # Common F&O ban stocks
+    "NATIONALUM", "NHPC", "RBLBANK", "INDUSTOWER", "SUZLON",
+    "YESBANK", "IRFC", "IDEA", "ZEEL",
+    # Financial terms
+    "OHLCV", "USDINR", "EURINR", "GBPINR", "JPYINR",
+    "FII", "DII", "VIX", "OI", "PCR",
+    "NSE", "BSE", "SEBI", "RBI", "MCX",
+]
 
 VALIDATION_SENTENCES = [
     "Morning data download complete. All 50 stocks clean, no gaps.",
