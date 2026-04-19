@@ -1,0 +1,14 @@
+# Model architecture config — all values configurable, no hardcoding in model.py
+# To reduce model size: lower n_layers or hidden_dim
+# To increase context: raise context_window (costs memory)
+
+vocab_size: 7315          # Set from tokenizer output — update after each tokenizer rebuild
+n_layers: 24
+n_heads: 12
+hidden_dim: 768
+ffn_dim: 3072             # 4x hidden_dim
+dropout: 0.1
+activation: gelu          # options: gelu, relu, silu
+positional_encoding: rope  # RoPE — Rotary Position Embedding
+context_window: 2048
+weight_tying: true        # tie input embeddings to output projection

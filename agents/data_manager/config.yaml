@@ -1,0 +1,9 @@
+# Data Manager agent config
+# Training overrides go under the "training" key
+
+agent: data_manager
+description: Downloads, validates, and reports on market data
+
+training:
+  epochs: 50
+  batch_size: 2
