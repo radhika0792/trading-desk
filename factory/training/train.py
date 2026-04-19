@@ -69,8 +69,8 @@ def train(args):
     print(f"Device: {device}")
 
     model_cfg = ModelConfig.from_yaml(str(model_cfg_path))
-    model = BornTrader(model_cfg).to(device)
-    print(f"Model: {model.count_parameters():,} parameters")
+    model = BornTrader(model_cfg, gradient_checkpointing=args.grad_checkpoint).to(device)
+    print(f"Model: {model.count_parameters():,} parameters" + (" [gradient checkpointing ON]" if args.grad_checkpoint else ""))
 
     # Resume from checkpoint if specified
     start_epoch = 1
@@ -220,5 +220,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch-size", type=int, default=None, dest="batch_size")
     parser.add_argument("--max-tokens", type=int, default=None, dest="max_tokens",
                         help="Cap tokens loaded (pretrain) e.g. 10000000 for 10M")
+    parser.add_argument("--grad-checkpoint", action="store_true", dest="grad_checkpoint",
+                        help="Enable gradient checkpointing to reduce VRAM at cost of speed")
     args = parser.parse_args()
     train(args)

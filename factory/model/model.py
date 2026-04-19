@@ -14,6 +14,7 @@ import yaml
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -129,9 +130,10 @@ class TransformerBlock(nn.Module):
 class BornTrader(nn.Module):
     """Decoder-only transformer. Load from config.yaml, never hardcode parameters."""
 
-    def __init__(self, cfg: ModelConfig):
+    def __init__(self, cfg: ModelConfig, gradient_checkpointing: bool = False):
         super().__init__()
         self.cfg = cfg
+        self.gradient_checkpointing = gradient_checkpointing
         self.embedding = nn.Embedding(cfg.vocab_size, cfg.hidden_dim)
         self.drop = nn.Dropout(cfg.dropout)
         self.blocks = nn.ModuleList([TransformerBlock(cfg) for _ in range(cfg.n_layers)])
@@ -167,7 +169,10 @@ class BornTrader(nn.Module):
         """
         x = self.drop(self.embedding(input_ids))
         for block in self.blocks:
-            x = block(x, self.rope_freqs, self.causal_mask)
+            if self.gradient_checkpointing and self.training:
+                x = checkpoint(block, x, self.rope_freqs, self.causal_mask, use_reentrant=False)
+            else:
+                x = block(x, self.rope_freqs, self.causal_mask)
         x = self.norm(x)
         return self.lm_head(x)
 
