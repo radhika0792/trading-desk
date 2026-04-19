@@ -127,12 +127,15 @@ def train(args):
         betas=(0.9, 0.95),
     )
 
+    # float16 AMP on CUDA (T4 accelerates fp16 natively), bfloat16 on MPS
     use_amp = device.type in ("cuda", "mps")
-    dtype = torch.bfloat16 if use_amp else torch.float32
+    amp_dtype = torch.float16 if device.type == "cuda" else torch.bfloat16
+    scaler = torch.cuda.GradScaler() if device.type == "cuda" else None
 
     print(f"\nStarting {args.mode} — {epochs} epochs, batch_size={batch_size}, lr={lr}")
     if args.resume:
         print(f"  Loaded from : {args.resume}")
+    print(f"  Precision   : {'float16 + GradScaler' if scaler else 'bfloat16' if use_amp else 'float32'}")
     print(f"  Save to     : {args.save}")
     print("=" * 60)
 
@@ -158,7 +161,7 @@ def train(args):
             optimizer.zero_grad()
 
             if use_amp:
-                with torch.autocast(device_type=device.type, dtype=dtype):
+                with torch.autocast(device_type=device.type, dtype=amp_dtype):
                     logits = model(input_ids)
                     loss = nn.functional.cross_entropy(
                         logits.reshape(-1, model_cfg.vocab_size),
@@ -173,9 +176,16 @@ def train(args):
                     ignore_index=-100,
                 )
 
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-            optimizer.step()
+            if scaler:
+                scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+                optimizer.step()
 
             epoch_loss += loss.item()
 
