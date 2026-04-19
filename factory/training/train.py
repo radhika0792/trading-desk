@@ -176,8 +176,8 @@ def train(agent: str):
         loss_history.append(epoch_loss)
         print(f"Epoch {epoch}/{epochs} complete — Loss: {epoch_loss:.4f} — Time: {elapsed:.1f}s")
 
-        # Save checkpoint
-        if epoch % save_every == 0:
+        # Save checkpoint (save_every_n_epochs: 0 disables epoch checkpoints)
+        if save_every > 0 and epoch % save_every == 0:
             ckpt_path = weights_dir / f"epoch_{epoch}.pt"
             torch.save({"epoch": epoch, "model_state": model.state_dict(), "loss": epoch_loss}, ckpt_path)
             print(f"  Saved: {ckpt_path}")
