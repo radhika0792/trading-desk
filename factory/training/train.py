@@ -89,10 +89,11 @@ def train(args):
     if args.mode == "pretrain":
         from factory.training.pretrain_data_loader import make_pretrain_dataloader
         data_dir = args.data if args.data else str(ROOT / "factory" / "corpus" / "stage1_english")
+        pretrain_ctx = args.pretrain_ctx if args.pretrain_ctx else model_cfg.context_window
         loader = make_pretrain_dataloader(
             data_dir=data_dir,
             tokenizer_path=str(tokenizer_path),
-            context_window=model_cfg.context_window,
+            context_window=pretrain_ctx,
             batch_size=batch_size,
             max_tokens=args.max_tokens,
         )
@@ -232,5 +233,7 @@ if __name__ == "__main__":
                         help="Cap tokens loaded (pretrain) e.g. 10000000 for 10M")
     parser.add_argument("--grad-checkpoint", action="store_true", dest="grad_checkpoint",
                         help="Enable gradient checkpointing to reduce VRAM at cost of speed")
+    parser.add_argument("--pretrain-ctx", type=int, default=None, dest="pretrain_ctx",
+                        help="Token chunk size for pretraining (default: model context_window). Use 512 for speed.")
     args = parser.parse_args()
     train(args)
